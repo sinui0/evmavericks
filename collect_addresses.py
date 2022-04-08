@@ -17,6 +17,8 @@ if 'all_addresses.csv' not in files:
     df = pd.DataFrame(columns=['author','address'])
     df.to_csv('all_addresses.csv', index=False)
 
+whitelist = set(pd.read_csv('whitelist.csv')['author'].tolist())
+
 async def run():
     reddit = asyncpraw.Reddit(
         client_id=os.environ['CLIENT_ID'],
@@ -30,20 +32,21 @@ async def run():
     async for msg in reddit.inbox.unread():
         if msg.author:
             addr = extract_address(msg.body)
-            if addr:
+            if addr and (msg.author.name in whitelist):
                 addrs.append({'author':msg.author.name, 'address':addr})
         await msg.mark_read()
 
-    df = pd.DataFrame(addrs).drop_duplicates('author')
-    df_existing = pd.read_csv('all_addresses.csv')
+    if addrs:
+        df = pd.DataFrame(addrs).drop_duplicates('author')
+        df_existing = pd.read_csv('all_addresses.csv')
 
-    # Save new addresses
-    df_new = df[~df['author'].isin(df_existing['author'])]
-    df_new.to_csv('new_addresses.csv', index=False)
+        # Save new addresses
+        df_new = df[~df['author'].isin(df_existing['author'])]
+        df_new.to_csv('new_addresses.csv', index=False)
 
-    # Save addresses to full record so we don't count them twice
-    df = pd.concat([df, df_existing]).drop_duplicates('author')
-    df.to_csv('all_addresses.csv', index=False)
+        # Save addresses to full record so we don't count them twice
+        df = pd.concat([df, df_existing]).drop_duplicates('author')
+        df.to_csv('all_addresses.csv', index=False)
 
     await reddit.close()
 
