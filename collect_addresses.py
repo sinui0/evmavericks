@@ -6,13 +6,11 @@ import asyncio
 from dotenv import load_dotenv
 load_dotenv()
 
-address_pattern = re.compile('0x[a-fA-F0-9]{40}$')
+address_pattern = re.compile(r'(0x[a-fA-F0-9]{40})')
 def extract_address(t):
-    addresses = address_pattern.findall(t)
+    addresses = address_pattern.search(t)
     if addresses:
-        return addresses[0]
-    else:
-        return None
+        return addresses.group(0)
 
 files = os.listdir('.')
 if 'all_addresses.csv' not in files:
