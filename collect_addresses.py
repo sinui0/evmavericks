@@ -29,7 +29,7 @@ async def run():
     )
 
     addrs = []
-    async for msg in reddit.inbox.messages():
+    async for msg in reddit.inbox.unread():
         if msg.author and isinstance(msg, asyncpraw.models.Message):
             addr = extract_address(msg.body)
             if addr and (msg.author.name in whitelist):
