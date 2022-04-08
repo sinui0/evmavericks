@@ -45,7 +45,7 @@ async def run():
         df_new.to_csv('new_addresses.csv', index=False)
 
         # Save addresses to full record so we don't count them twice
-        df = pd.concat([df, df_existing]).drop_duplicates('author')
+        df = pd.concat([df_existing, df]).drop_duplicates('author')
         df.to_csv('all_addresses.csv', index=False)
 
     await reddit.close()
